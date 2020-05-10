@@ -37,18 +37,20 @@ public class WebSocketEndpoint {
   @OnMessage
   public void onMessage(String message, Session session) {
     try {
-      this.session.getBasicRemote().sendText("Message Recieved from Client: " + message);
-      broadcast(message);
+      broadcast(message, this);
     } catch (IOException | EncodeException e) {
       e.printStackTrace();
     }
   }
 
-  private static void broadcast(String message) throws IOException, EncodeException {
+  private static void broadcast(String message, WebSocketEndpoint sender) throws IOException, EncodeException {
     chatEndpoints.forEach(endpoint -> {
       synchronized (endpoint) {
         try {
-          endpoint.session.getBasicRemote().sendText(message);
+          if (endpoint != sender)
+          {
+            endpoint.session.getBasicRemote().sendText(message);
+          }
         } catch (IOException e) {
           e.printStackTrace();
         }
